@@ -9,35 +9,49 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import com.example.myroutine.ui.theme.MyRoutineTheme
 
 class MainActivity : ComponentActivity() {
 
-    private val WEB_URL = "https://calm-profiterole-ad8f27.netlify.app"
+    private lateinit var webView: WebView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             MyRoutineTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPaddingValue ->
-                    WebViewScreen(WEB_URL, innerPaddingValue)
+                    WebViewScreen(innerPaddingValue) { instance ->
+                        webView = instance
+                    }
                 }
             }
+        }
+    }
+
+    override fun onBackPressed() {
+        if (::webView.isInitialized && webView.canGoBack()) {
+            webView.goBack()
+        } else {
+            super.onBackPressed()
         }
     }
 }
 
 @Composable
-private fun WebViewScreen(url: String, innerPaddingValue: PaddingValues) {
+private fun WebViewScreen(
+    innerPaddingValue: PaddingValues,
+    onWebViewReady: (WebView) -> Unit
+) {
     AndroidView(
         factory = { context ->
             WebView(context).apply {
                 webViewClient = WebViewClient()
                 settings.javaScriptEnabled = true
-                loadUrl(url)
+                loadUrl(AppConfig.WEB_URL)
+                onWebViewReady(this)
             }
         },
         modifier = Modifier
