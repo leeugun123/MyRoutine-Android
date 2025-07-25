@@ -16,14 +16,14 @@ import com.example.myroutine.ui.theme.MyRoutineTheme
 
 class MainActivity : ComponentActivity() {
 
-    private val WEB_URL = "https://687793d89f558cb8375cbee7--calm-profiterole-ad8f27.netlify.app/#/"
+    private val WEB_URL = "https://calm-profiterole-ad8f27.netlify.app"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             MyRoutineTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPaddingValue ->
-                    WebViewScreen(WEB_URL,innerPaddingValue)
+                    WebViewScreen(WEB_URL, innerPaddingValue)
                 }
             }
         }
@@ -31,15 +31,18 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun WebViewScreen(urlToRender: String, innerPaddingValue : PaddingValues) {
+private fun WebViewScreen(url: String, innerPaddingValue: PaddingValues) {
     AndroidView(
         factory = { context ->
             WebView(context).apply {
                 webViewClient = WebViewClient()
                 settings.javaScriptEnabled = true
-                loadUrl(urlToRender)
+                loadUrl(url)
             }
         },
-        modifier = Modifier.fillMaxSize().padding(innerPaddingValue)
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPaddingValue)
     )
 }
+
