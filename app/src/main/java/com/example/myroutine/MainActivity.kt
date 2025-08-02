@@ -1,6 +1,15 @@
 package com.example.myroutine
 
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.os.Bundle
+import android.os.Message
+import android.util.Log
+import android.view.ViewGroup
+import android.webkit.ConsoleMessage
+import android.webkit.JsResult
+import android.webkit.WebChromeClient
+import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.ComponentActivity
@@ -21,12 +30,12 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        registerBackPressDispatcher()
         setContent {
             MyRoutineTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPaddingValue ->
                     WebViewScreen(innerPaddingValue) { instance ->
                         webView = instance
+                        registerBackPressDispatcher()
                     }
                 }
             }
@@ -52,8 +61,113 @@ private fun WebViewScreen(
     AndroidView(
         factory = { context ->
             WebView(context).apply {
-                webViewClient = WebViewClient()
-                settings.javaScriptEnabled = true
+                settings.apply {
+                    javaScriptEnabled = true
+                    domStorageEnabled = true
+                    setSupportMultipleWindows(true)
+                    javaScriptCanOpenWindowsAutomatically = true
+                    loadWithOverviewMode = true
+                    useWideViewPort = true
+                }
+
+                webViewClient = object : WebViewClient() {
+                    override fun shouldOverrideUrlLoading(
+                        view: WebView?,
+                        request: WebResourceRequest?
+                    ): Boolean {
+                        return false
+                    }
+                }
+
+                webChromeClient = object : WebChromeClient() {
+                    override fun onCreateWindow(
+                        view: WebView?,
+                        isDialog: Boolean,
+                        isUserGesture: Boolean,
+                        resultMsg: Message?
+                    ): Boolean {
+                        val newWebView = WebView(context)
+                        newWebView.apply {
+                            isFocusable = true
+                            isFocusableInTouchMode = true
+                            settings.javaScriptEnabled = true
+                            settings.javaScriptCanOpenWindowsAutomatically = true
+                            settings.domStorageEnabled = true
+                            settings.useWideViewPort = true
+                            settings.loadWithOverviewMode = true
+                            settings.setSupportMultipleWindows(true)
+                        }
+
+                        val dialog = android.app.Dialog(context)
+                        dialog.apply {
+                            setContentView(newWebView)
+                            setCancelable(true)
+                            window?.setLayout(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT
+                            )
+                            show()
+                        }
+
+                        newWebView.webChromeClient = object : WebChromeClient() {
+                            override fun onCloseWindow(window: WebView?) {
+                                dialog.dismiss()
+                            }
+                        }
+
+                        (resultMsg?.obj as? WebView.WebViewTransport)?.webView = newWebView
+                        resultMsg?.sendToTarget()
+
+                        return true
+                    }
+
+                    override fun onJsAlert(
+                        view: WebView,
+                        url: String?,
+                        message: String?,
+                        result: JsResult
+                    ): Boolean {
+                        AlertDialog.Builder(view.context)
+                            .setTitle("알림")
+                            .setMessage(message)
+                            .setPositiveButton("확인") { _: DialogInterface?, _: Int ->
+                                result.confirm()
+                            }
+                            .setCancelable(false)
+                            .create()
+                            .show()
+                        return true
+                    }
+
+                    override fun onJsConfirm(
+                        view: WebView,
+                        url: String?,
+                        message: String?,
+                        result: JsResult
+                    ): Boolean {
+                        AlertDialog.Builder(view.context)
+                            .setTitle("확인")
+                            .setMessage(message)
+                            .setPositiveButton("예") { _: DialogInterface?, _: Int ->
+                                result.confirm()
+                            }
+                            .setNegativeButton("아니오") { _: DialogInterface?, _: Int ->
+                                result.cancel()
+                            }
+                            .setCancelable(false)
+                            .create()
+                            .show()
+                        return true
+                    }
+
+                    override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
+                        Log.d(
+                            "WebViewConsole",
+                            "${consoleMessage?.message()} -- From line ${consoleMessage?.lineNumber()} of ${consoleMessage?.sourceId()}"
+                        )
+                        return true
+                    }
+                }
                 loadUrl(AppConfig.WEB_URL)
                 onWebViewReady(this)
             }
@@ -63,4 +177,3 @@ private fun WebViewScreen(
             .padding(innerPaddingValue)
     )
 }
-
