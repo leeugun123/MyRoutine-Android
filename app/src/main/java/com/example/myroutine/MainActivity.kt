@@ -12,6 +12,7 @@ import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.addCallback
 import androidx.activity.compose.setContent
@@ -27,6 +28,7 @@ import com.example.myroutine.ui.theme.MyRoutineTheme
 class MainActivity : ComponentActivity() {
 
     private lateinit var webView: WebView
+    private var lastBackPressedTime = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,8 +48,19 @@ class MainActivity : ComponentActivity() {
         onBackPressedDispatcher.addCallback(this) {
             if (::webView.isInitialized && webView.canGoBack()) {
                 webView.goBack()
-            } else {
+                return@addCallback
+            }
+
+            val now = System.currentTimeMillis()
+            if (now - lastBackPressedTime < 2000) {
                 finish()
+            } else {
+                lastBackPressedTime = now
+                Toast.makeText(
+                    this@MainActivity,
+                    "뒤로 버튼을 한 번 더 누르면 종료됩니다.",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }
