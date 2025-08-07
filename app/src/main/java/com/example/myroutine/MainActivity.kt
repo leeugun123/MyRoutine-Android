@@ -29,6 +29,7 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var webView: WebView
     private var lastBackPressedTime = 0L
+    private val BACK_PRESS_INTERVAL_MS = 1000L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -101,34 +102,13 @@ class MainActivity : ComponentActivity() {
                             newWebView.webChromeClient = object : WebChromeClient() {
                                 override fun onCloseWindow(window: WebView?) {
                                     dialog.dismiss()
+                                    window?.destroy()
                                 }
                             }
 
                             (resultMsg?.obj as? WebView.WebViewTransport)?.webView = newWebView
                             resultMsg?.sendToTarget()
 
-                            return true
-                        }
-
-                        override fun onJsAlert(
-                            view: WebView, url: String?, message: String?, result: JsResult
-                        ): Boolean {
-                            AlertDialog.Builder(view.context).setTitle("알림").setMessage(message)
-                                .setPositiveButton("확인") { _: DialogInterface?, _: Int ->
-                                    result.confirm()
-                                }.setCancelable(false).create().show()
-                            return true
-                        }
-
-                        override fun onJsConfirm(
-                            view: WebView, url: String?, message: String?, result: JsResult
-                        ): Boolean {
-                            AlertDialog.Builder(view.context).setTitle("확인").setMessage(message)
-                                .setPositiveButton("예") { _: DialogInterface?, _: Int ->
-                                    result.confirm()
-                                }.setNegativeButton("아니오") { _: DialogInterface?, _: Int ->
-                                    result.cancel()
-                                }.setCancelable(false).create().show()
                             return true
                         }
 
@@ -151,19 +131,19 @@ class MainActivity : ComponentActivity() {
 
     private fun registerBackPressDispatcher() {
         onBackPressedDispatcher.addCallback(this) {
-            if (::webView.isInitialized && webView.canGoBack()) {
-                webView.goBack()
+            if (!::webView.isInitialized) {
                 return@addCallback
             }
 
             val now = System.currentTimeMillis()
-            if (now - lastBackPressedTime < 2000) {
+            if (now - lastBackPressedTime < BACK_PRESS_INTERVAL_MS) {
+                Toast.makeText(
+                    this@MainActivity, "앱을 종료합니다.", Toast.LENGTH_SHORT
+                ).show()
                 finish()
             } else {
+                webView.goBack()
                 lastBackPressedTime = now
-                Toast.makeText(
-                    this@MainActivity, "뒤로 버튼을 한 번 더 누르면 종료됩니다.", Toast.LENGTH_SHORT
-                ).show()
             }
         }
     }
