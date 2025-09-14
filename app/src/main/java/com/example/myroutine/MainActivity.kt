@@ -1,13 +1,10 @@
 package com.example.myroutine
 
-import android.app.AlertDialog
-import android.content.DialogInterface
 import android.os.Bundle
 import android.os.Message
 import android.util.Log
 import android.view.ViewGroup
 import android.webkit.ConsoleMessage
-import android.webkit.JsResult
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -23,6 +20,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
+import com.example.myroutine.notification.AlarmScheduler
+import com.example.myroutine.notification.NotificationHelper
 import com.example.myroutine.ui.theme.MyRoutineTheme
 
 class MainActivity : ComponentActivity() {
@@ -33,6 +32,12 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 100)
+        }
+        NotificationHelper.createNotificationChannel(this)
+        AlarmScheduler.setDailyAlarm(this)
+
         setContent {
             MyRoutineTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPaddingValue ->
@@ -123,17 +128,17 @@ class MainActivity : ComponentActivity() {
                     loadUrl(AppConfig.WEB_URL)
                     onWebViewReady(this)
                 }
-            }, modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPaddingValue)
+            },
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPaddingValue)
         )
     }
 
     private fun registerBackPressDispatcher() {
         onBackPressedDispatcher.addCallback(this) {
-            if (!::webView.isInitialized) {
+            if (!::webView.isInitialized)
                 return@addCallback
-            }
 
             val now = System.currentTimeMillis()
             if (now - lastBackPressedTime < BACK_PRESS_INTERVAL_MS) {
