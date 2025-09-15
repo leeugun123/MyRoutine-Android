@@ -5,10 +5,10 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.example.myroutine.AppConfig.NOTIFY_ID
 import com.example.myroutine.R
 
 class RoutineAlarmReceiver : BroadcastReceiver() {
@@ -27,7 +27,7 @@ class RoutineAlarmReceiver : BroadcastReceiver() {
             ) {
                 return
             }
-            notify(1001, builder.build())
+            notify(NOTIFY_ID, builder.build())
         }
     }
 } 
