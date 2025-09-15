@@ -14,9 +14,16 @@ object AlarmScheduler {
         val pendingIntent = PendingIntent.getBroadcast(
             context, 100, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        Log.e("Alarm","AlarmScheduler setDailyAlarm")
+
         val calendar = Calendar.getInstance().apply {
-            add(Calendar.MINUTE, 1)
+            set(Calendar.HOUR_OF_DAY, 9)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+            // 오전 9시 알림 설정
+            if (before(Calendar.getInstance())) {
+                add(Calendar.DATE, 1)
+            }
         }
 
         alarmManager.setRepeating(
@@ -26,14 +33,4 @@ object AlarmScheduler {
             pendingIntent
         )
     }
-    /*
-        fun cancelAlarm(context: Context) {
-            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            val intent = Intent(context, RoutineAlarmReceiver::class.java)
-            val pendingIntent = PendingIntent.getBroadcast(
-                context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-            alarmManager.cancel(pendingIntent)
-        }
-    */
 } 
