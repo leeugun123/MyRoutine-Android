@@ -1,14 +1,10 @@
 package com.example.myroutine
 
 import android.os.Bundle
-import android.os.Message
 import android.util.Log
-import android.view.ViewGroup
 import android.webkit.ConsoleMessage
 import android.webkit.WebChromeClient
-import android.webkit.WebResourceRequest
 import android.webkit.WebView
-import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.addCallback
@@ -46,7 +42,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun initRoutineNotification(){
+    private fun initRoutineNotification() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 100)
         }
@@ -64,65 +60,11 @@ class MainActivity : ComponentActivity() {
                     settings.apply {
                         javaScriptEnabled = true
                         domStorageEnabled = true
-                        setSupportMultipleWindows(true)
-                        javaScriptCanOpenWindowsAutomatically = true
-                        loadWithOverviewMode = true
-                        useWideViewPort = true
-                    }
-
-                    webViewClient = object : WebViewClient() {
-                        override fun shouldOverrideUrlLoading(
-                            view: WebView?, request: WebResourceRequest?
-                        ): Boolean {
-                            return false
-                        }
                     }
 
                     webChromeClient = object : WebChromeClient() {
-                        override fun onCreateWindow(
-                            view: WebView?,
-                            isDialog: Boolean,
-                            isUserGesture: Boolean,
-                            resultMsg: Message?
-                        ): Boolean {
-                            val newWebView = WebView(context)
-                            newWebView.apply {
-                                isFocusable = true
-                                isFocusableInTouchMode = true
-                                settings.javaScriptEnabled = true
-                                settings.javaScriptCanOpenWindowsAutomatically = true
-                                settings.domStorageEnabled = true
-                                settings.useWideViewPort = true
-                                settings.loadWithOverviewMode = true
-                                settings.setSupportMultipleWindows(true)
-                            }
-
-                            val dialog = android.app.Dialog(context)
-                            dialog.apply {
-                                setContentView(newWebView)
-                                setCancelable(true)
-                                window?.setLayout(
-                                    ViewGroup.LayoutParams.MATCH_PARENT,
-                                    ViewGroup.LayoutParams.MATCH_PARENT
-                                )
-                                show()
-                            }
-
-                            newWebView.webChromeClient = object : WebChromeClient() {
-                                override fun onCloseWindow(window: WebView?) {
-                                    dialog.dismiss()
-                                    window?.destroy()
-                                }
-                            }
-
-                            (resultMsg?.obj as? WebView.WebViewTransport)?.webView = newWebView
-                            resultMsg?.sendToTarget()
-
-                            return true
-                        }
-
                         override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
-                            Log.d(
+                            Log.e(
                                 "WebViewConsole",
                                 "${consoleMessage?.message()} -- From line ${consoleMessage?.lineNumber()} of ${consoleMessage?.sourceId()}"
                             )
