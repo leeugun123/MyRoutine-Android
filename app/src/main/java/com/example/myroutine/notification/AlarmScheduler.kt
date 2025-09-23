@@ -17,6 +17,10 @@ object AlarmScheduler {
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
+        /*
+        val calendar = Calendar.getInstance().apply {
+            add(Calendar.MINUTE, 1) // 현재 시간에서 1분 뒤
+        }*/ // DEV TEST용 코드
 
         val calendar = Calendar.getInstance().apply {
             set(Calendar.HOUR_OF_DAY, 9)
