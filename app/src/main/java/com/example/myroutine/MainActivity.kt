@@ -16,8 +16,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
-import com.example.myroutine.notification.AlarmScheduler
-import com.example.myroutine.notification.NotificationHelper
+import com.example.myroutine.bridge.WebBridge
 import com.example.myroutine.ui.theme.MyRoutineTheme
 
 class MainActivity : ComponentActivity() {
@@ -46,8 +45,6 @@ class MainActivity : ComponentActivity() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 100)
         }
-        NotificationHelper.createNotificationChannel(this)
-        AlarmScheduler.setDailyAlarm(this)
     }
 
     @Composable
@@ -71,6 +68,7 @@ class MainActivity : ComponentActivity() {
                             return true
                         }
                     }
+                    addJavascriptInterface(WebBridge(context), "webBridge")
                     loadUrl(AppConfig.WEB_URL)
                     onWebViewReady(this)
                 }
